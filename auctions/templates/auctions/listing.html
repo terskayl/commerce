@@ -1,7 +1,10 @@
 {% extends 'auctions/layout.html' %}
 {% block body %}
+    {% if listing.winner %} 
+        <h1> WINNER: {{ listing.winner }} with a bid of {{ listing.current_price }} </h1>
+        <h2>THIS ITEM HAS BEEN SOLD</h2>
+    {% endif %}
     <h2>{{ listing.title }}</h2>
-
     <div>
         <p>{{ listing.description }}</p>
         <img src="{{ listing.image }}">
@@ -20,8 +23,26 @@
     {% else %}
         <form action="/listing/{{ listing.id }}" method="POST">
             {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit Bid">
+            {{ bidForm }}
+            <input type="submit" name="bidButton" value="Submit Bid">
         </form>
     {% endif %}
+
+    <br>
+    Add Comments Here:
+    <form action="/listing/{{ listing.id }}" method="POST">
+        {% csrf_token %}
+        {{ commentForm }}
+    </form>
+
+    {% for comment in comments %}
+    <div>
+        <div width="25%">
+            <strong>{{ comment.user.username }}</strong>
+        </div>
+        <div>
+           {{ comment.text }}
+        </div>
+    </div>
+    {% endfor %}
 {% endblock %}

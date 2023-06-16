@@ -10,6 +10,14 @@ from .models import Listing
 from .models import Bid
 from .models import Comment
 
+CATEGORIES = [
+        ('',''),
+        ('EL','electronics'),
+        ('HO', 'home'),
+        ('TO', 'toys'),
+        ('FA', 'fashion')
+    ]
+
 def index(request):
     return render(request, "auctions/index.html", {
         'listings' : Listing.objects.filter(active=True)
@@ -72,13 +80,6 @@ class CreateListingForm(forms.Form):
     description = forms.CharField(label="Describe your item here", widget=forms.Textarea)
     starting_bid = forms.DecimalField(decimal_places=2)
     image = forms.URLField(required=False)
-    CATEGORIES = [
-        ('',''),
-        ('EL','electronics'),
-        ('HO', 'home'),
-        ('TO', 'toys'),
-        ('FA', 'fashion')
-    ]
     category = forms.ChoiceField(required=False, choices=CATEGORIES)
 
 def create_listing(request):
@@ -97,15 +98,24 @@ def create_listing(request):
 class BidForm(forms.Form):
     bid = forms.DecimalField(label='bid', decimal_places=2)
 
+class CommentForm(forms.Form):
+    text = forms.CharField(max_length=500)
+
 def listing(request, id):
+    l = Listing.objects.get(pk=id)
     if request.method == 'POST':
-        l = Listing.objects.get(pk=id)
+        print(request.POST)
         if 'watchlist' in request.POST:
             l.watched_by.add(request.user)
         elif 'close' in request.POST:
             l.active = False
             l.save()
-        else:
+            maxBid = max(l.bids.all(), key=lambda b: b.bid_amount)
+            l.current_price = maxBid.bid_amount
+            l.winner = maxBid.user
+            l.save()
+        elif "bidButton" in request.POST:
+            print('hi')
             form = BidForm(request.POST)
             if form.is_valid():
                 bid = form.cleaned_data['bid']
@@ -114,14 +124,31 @@ def listing(request, id):
                     l.save()
                     b = Bid(listing=l, user=request.user, bid_amount=bid)
                     b.save()
-                #return render(request, "auctions/register.html")
+        else:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                commentText = form.cleaned_data['text']
+                c = Comment(listing=l, user=request.user, text=commentText)
+                c.save()
     return render(request, "auctions/listing.html", {
-        'form' : BidForm(),
-        'listing' : Listing.objects.get(pk=id)
+        'bidForm' : BidForm(),
+        'commentForm' : CommentForm(),
+        'listing' : l,
+        'comments' : Comment.objects.filter(listing=l)
     })
 
 def watchlist(request):
     watchlistList = [l for l in Listing.objects.all() if request.user in l.watched_by.all() and l.active]
     return render(request, "auctions/index.html", {
         'listings' : watchlistList
+    })
+
+def category(request, catAbbr):
+    return render(request, "auctions/index.html", {
+        'listings' : Listing.objects.filter(active=True, category=catAbbr)
+    })
+
+def categoryList(request):
+    return render(request, "auctions/categoryList.html", {
+        'categories' : CATEGORIES[1:]
     })

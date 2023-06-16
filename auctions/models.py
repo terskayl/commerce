@@ -14,6 +14,7 @@ class Listing(models.Model):
     active = models.BooleanField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     watched_by = models.ManyToManyField(User, blank=True, related_name="watchlist")
+    winner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.title}: listing num {self.id}, at {self.current_price}, {self.category}"
