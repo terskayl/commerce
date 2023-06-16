@@ -1,0 +1,27 @@
+{% extends 'auctions/layout.html' %}
+{% block body %}
+    <h2>{{ listing.title }}</h2>
+
+    <div>
+        <p>{{ listing.description }}</p>
+        <img src="{{ listing.image }}">
+        <h3>${{ listing.current_price }}</h3>
+        <h5>{{ listing.category }}</h5>
+    </div>
+    <form action="/listing/{{ listing.id }}" method="POST">
+        {% csrf_token %}
+        <input type="submit" name="watchlist" value="Add to Watchlist">
+    </form>
+    {% if listing.owner == request.user %}
+        <form action="/listing/{{ listing.id }}" method="POST">
+            {% csrf_token %}
+            <input type="submit" name="close" value="Close Listing">
+        </form>
+    {% else %}
+        <form action="/listing/{{ listing.id }}" method="POST">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Submit Bid">
+        </form>
+    {% endif %}
+{% endblock %}
