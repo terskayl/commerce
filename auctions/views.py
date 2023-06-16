@@ -7,8 +7,8 @@ from django import forms
 
 from .models import User
 from .models import Listing
-from .models import Bids
-from .models import Comments
+from .models import Bid
+from .models import Comment
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -112,7 +112,7 @@ def listing(request, id):
                 if bid > l.current_price:
                     l.current_price = bid
                     l.save()
-                    b = Bids(listing=l, user=request.user, bid_amount=bid)
+                    b = Bid(listing=l, user=request.user, bid_amount=bid)
                     b.save()
                 #return render(request, "auctions/register.html")
     return render(request, "auctions/listing.html", {

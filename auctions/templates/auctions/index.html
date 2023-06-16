@@ -10,6 +10,7 @@
                 {{ listing.title }}
             </a>
         </h1>
+        <h5>{{ listing.owner.username }}</h5>
         <p>{{ listing.description }}</p>
         <img src="{{ listing.image }}">
         <h3>${{ listing.current_price }}</h3>
