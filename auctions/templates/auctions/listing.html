@@ -1,48 +1,69 @@
 {% extends 'auctions/layout.html' %}
 {% block body %}
-    {% if listing.winner %} 
-        <h1> WINNER: {{ listing.winner }} with a bid of {{ listing.current_price }} </h1>
-        <h2>THIS ITEM HAS BEEN SOLD</h2>
-    {% endif %}
-    <h2>{{ listing.title }}</h2>
-    <div>
-        <p>{{ listing.description }}</p>
-        <img src="{{ listing.image }}">
-        <h3>${{ listing.current_price }}</h3>
-        <h5>{{ listing.category }}</h5>
-    </div>
-    <form action="/listing/{{ listing.id }}" method="POST">
-        {% csrf_token %}
-        <input type="submit" name="watchlist" value="Add to Watchlist">
-    </form>
-    {% if listing.owner == request.user %}
-        <form action="/listing/{{ listing.id }}" method="POST">
-            {% csrf_token %}
-            <input type="submit" name="close" value="Close Listing">
-        </form>
-    {% else %}
-        <form action="/listing/{{ listing.id }}" method="POST">
-            {% csrf_token %}
-            {{ bidForm }}
-            <input type="submit" name="bidButton" value="Submit Bid">
-        </form>
-    {% endif %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                {% if listing.winner %} 
+                    <h1> WINNER: {{ listing.winner }} with a bid of {{ listing.current_price }} </h1>
+                    <h2>THIS ITEM HAS BEEN SOLD</h2>
+                {% elif not listing.active %}
+                    <h1> THIS ITEM HAS BEEN CLOSED, but since there were no bids, this item did not sell</h1>
+                {% endif %}
+                <h2>{{ listing.title }}</h2>
+                <h5>{{ listing.owner.username }}</h5>
+                <p style="margin-bottom: 0px;">{{ listing.description }}</p>
+                <div class="col d-flex justify-content-center p-3"><img src="{{ listing.image }}" width="85%" style="margin: auto"></div>
+                <h3>${{ listing.current_price }}</h3>
+                <h5>{{ listing.category }}</h5>
+                {% if user.is_authenticated %}
+                    <form action="/listing/{{ listing.id }}" method="POST">
+                        {% csrf_token %}
+                        {% if isWatched %}
+                            <input type="submit" name="watchlist" value="Remove from Watchlist">
+                        {% else %}
+                            <input type="submit" name="watchlist" value="Add to Watchlist">
+                        {% endif %}
+                    </form>
+                {% endif %}
+                {% if listing.owner == request.user %}
+                    <form action="/listing/{{ listing.id }}" method="POST">
+                        {% csrf_token %}
+                        <input type="submit" name="close" value="Close Listing">
+                    </form>
+                {% elif user.is_authenticated %}
+                    <form action="/listing/{{ listing.id }}" method="POST">
+                        {% csrf_token %}
+                        {{ bidForm }}
+                        <input type="submit" name="bidButton" value="Submit Bid">
+                    </form>
+                {% endif %}
 
-    <br>
-    Add Comments Here:
-    <form action="/listing/{{ listing.id }}" method="POST">
-        {% csrf_token %}
-        {{ commentForm }}
-    </form>
-
-    {% for comment in comments %}
-    <div>
-        <div width="25%">
-            <strong>{{ comment.user.username }}</strong>
-        </div>
-        <div>
-           {{ comment.text }}
+                <br>
+            </div> 
+            <div class="col-md-8">
+                {% if user.is_authenticated %}
+                    Add Comments Here:
+                    <form action="/listing/{{ listing.id }}" method="POST">
+                        {% csrf_token %}
+                        {{ commentForm }}
+                    </form>
+                {% else %}
+                    Comments:
+                {% endif %}
+            {% for comment in comments %}
+                <div>
+                    <div width="25%">
+                        <strong>{{ comment.user.username }}</strong>
+                    </div>
+                    <div>
+                    {{ comment.text }}
+                    </div>
+                </div>
+                
+            {% endfor %}
+            </div>
         </div>
     </div>
-    {% endfor %}
+    
+    
 {% endblock %}

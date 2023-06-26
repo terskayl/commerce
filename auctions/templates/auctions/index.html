@@ -2,19 +2,30 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
+    <div class="row g-10">
     {% for listing in listings %}
-    <div>
-        <h1> 
-            <a href="{% url 'listing' listing.id %}">
-                {{ listing.title }}
-            </a>
-        </h1>
-        <h5>{{ listing.owner.username }}</h5>
-        <p>{{ listing.description }}</p>
-        <img src="{{ listing.image }}">
-        <h3>${{ listing.current_price }}</h3>
-        <h5>{{ listing.category }}</h5>
-    </div>
+        <div class="col-md-4">
+            <div class="bg-body-tertiary rounded bg-secondary mb-4">
+                <div class="container p-3 text-break">
+                    <h1> 
+                        <a style="color:white" href="{% url 'listing' listing.id %}">
+                            {{ listing.title }}
+                        </a>
+                    </h1>
+                    <p class="mb-0">{{ listing.description }}</p>
+                    <div class="col d-flex justify-content-center p-3">
+                        {% if listing.image %}
+                        <div class="square-image-wrapper">
+                            <img src="{{ listing.image }}" width="85%" style="margin: auto">
+                        </div>
+                        {% endif %}
+                    </div>
+                    <h3>${{ listing.current_price }}</h3>
+                    <h5>{{ listing.category }}</h5>
+                </div>
+            </div>
+        </div>
     {% endfor %}
+    </div>
+    
 {% endblock %}
